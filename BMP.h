@@ -3,6 +3,7 @@
 #include<string>
 #include<vector>
 #include<cmath>
+#include<algorithm>
 #include<iostream>
 // 针对该结构体的字节对齐问题调整对齐策略
 #pragma pack(push,1)
@@ -95,6 +96,31 @@ public:
 
     // 图像矩形裁剪，dst:裁剪后的图像。ul<x,y>是左上点的坐标，lr<x,y>是右下点的坐标,以图像左上角为原点,水平向右为x正轴，垂直向下为y正轴
     void RectCut(BMP& dst,std::pair<int,int> ul,std::pair<int,int> lr);
+
+    /*** 
+     * @description: 中值滤波
+     * @param {BMP&} dst 目标图像
+     * @param {pair<int,int>} size 卷积核大小
+     * @return {*}
+     */    
+    void MadianBlur(BMP& dst,std::pair<int,int> size);
+
+    /*** 
+     * @description: 均值滤波
+     * @param {BMP&} dst 目标图像
+     * @param {pair<int,int>} size 卷积核大小
+     * @return {*}
+     */    
+    void MeanBlur(BMP& dst,std::pair<int,int> size);
+    /*** 
+     * @description: 高斯滤波
+     * @param {BMP&} dst 目标图像
+     * @param {pair<int,int>} size 卷积核大小
+     * @param {float} sigma 标准差，sigma越小，模板的中心系数越大，周围的系数越小，这样对图像的平滑效果就不是很明显；
+                                   sigma越大，模板的各个系数相差就不是很大，比较类似均值模板，对图像的平滑效果比较明显。
+     * @return {*}
+     */
+    void GaussianBlur(BMP& dst,std::pair<int,int> size,float sigma);
 private:
 
     // 设置图像的参数
@@ -111,6 +137,8 @@ private:
 
     // 双线性插值
     void InterLinear(BMP& dst, std::pair<int,int> size);
+
+    
 private:
     BMPFILEHEADER bmpfileheader;
     BITMAPINFOHEADER bitmapinfoheader;

@@ -7,6 +7,13 @@ int main() {
     string ImageName = "Baboon.bmp";
     test.ReadImage(ImageName);
     BMP test2;
+    BMP test3;
+    test.GaussianBlur(test2,{5,5},1.6);
+    test2.WriteImage("gaussiandst.bmp");
+    // test.MeanBlur(test2,{3,3});
+    // test.MadianBlur(test3,{3,3});
+    // test2.WriteImage("meandst.bmp");
+    // test3.WriteImage("mediandst.bmp");
     // test.Resize(test2,{0,0},5,5);
     // test.WeightGray(test2,{0.8,0.1,0.1});
     // test.Inverse(test2);
@@ -14,8 +21,8 @@ int main() {
     // test.WeightGray(test2);
     // test2.WriteImage("testLINEA.bmp");
     // test.Inverse(test2);
-    test.RectCut(test2,{0,0},{512,512});
+    // test.RectCut(test2,{0,0},{512,512});
     // test.Resize(test2,{0,0},5,5,INTER_NEAREST);
-    test2.WriteImage("testNEAR.bmp");
+    // test2.WriteImage("testNEAR.bmp");
     return 0;
 }

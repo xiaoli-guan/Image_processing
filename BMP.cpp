@@ -71,6 +71,95 @@ bool BMP::ReadImage(std::string ImageName)
     return SUCCESS;
 }
 
+void BMP::MeanBlur(BMP &dst, std::pair<int, int> size)
+{
+    dst.SetSize(height,width,biBitCount);
+
+    // 求均值
+    auto mean = [this,&size](int ii,int jj)->PIXELS{
+        int sum_R = 0;
+        int sum_G = 0;
+        int sum_B = 0;
+        int sum_A = 0;
+        int temp_i = size.first / 2;
+        int temp_j = size.second / 2;
+        int count = 0;
+        for(int i = std::max(ii-temp_i,0); i < std::min(ii+temp_i+1,this->height); i++){
+            for(int j = std::max(jj-temp_j,0);j< std::min(jj+temp_j+1,this->width);j++){
+                sum_R += this->pixels[i][j].R;
+                sum_G += this->pixels[i][j].G;
+                sum_B += this->pixels[i][j].B;
+                sum_A += this->pixels[i][j].A;
+                count++;
+            }
+        }
+        return {(unsigned char)(sum_B/count),(unsigned char)(sum_G/count),(unsigned char)(sum_R/count),(unsigned char)(sum_B/count)};
+
+    };
+
+    for(int i = 0;i<height;i++){
+        for(int j = 0;j<width;j++){
+            dst.pixels[i][j] = mean(i,j);
+        }
+    }
+}
+
+void BMP::GaussianBlur(BMP &dst, std::pair<int, int> size, float sigma)
+{
+    dst.SetSize(height,width,biBitCount);
+
+    // 计算高斯滤波的卷积核
+    auto GetGaussianKernel = [&size,sigma](int& sum)->std::vector<std::vector<int>>{
+        std::vector<std::vector<int>> kernel(size.first,std::vector<int>(size.second));
+
+        float y = -size.first/2;
+        float x = -size.second/2;
+        // 归一化
+        float temp = 1/(std::exp(-(x*x+y*y)/(2 * sigma * sigma)));
+        for(int i = 0; i<size.first;i++){
+            for(int j = 0;j<size.second;j++){
+                y = i - size.first/2;
+                x = j - size.second/2;
+                kernel[i][j] = (int)(std::exp(-(x*x+y*y)/(2 * sigma * sigma))*temp);
+                sum += kernel[i][j];
+            }
+        }
+        return kernel;
+    };
+
+    int sum = 0;
+    auto kernel = GetGaussianKernel(sum);
+
+    // 求卷积
+    auto convolution = [this,&kernel,&size,sum](int ii,int jj)->PIXELS{
+        int sum_R = 0;
+        int sum_G = 0;
+        int sum_B = 0;
+        int sum_A = 0;
+        int temp_i = size.first / 2;
+        int temp_j = size.second / 2;
+        int x = -1,y = -1;
+        for(int i = std::max(ii-temp_i,0); i < std::min(ii+temp_i+1,this->height); i++){
+            y = i-ii+size.first/2;
+            for(int j = std::max(jj-temp_j,0);j< std::min(jj+temp_j+1,this->width);j++){
+                x = j-jj+size.second/2;
+                sum_R += this->pixels[i][j].R * kernel[y][x];
+                sum_G += this->pixels[i][j].G * kernel[y][x];
+                sum_B += this->pixels[i][j].B * kernel[y][x];
+                sum_A += this->pixels[i][j].A * kernel[y][x];
+            }
+        }
+
+        return {(unsigned char)(sum_B/sum),(unsigned char)(sum_G/sum),(unsigned char)(sum_R/sum),(unsigned char)(sum_A/sum)};
+    };
+
+    for(int i = 0;i<height;i++){
+        for(int j = 0;j<width;j++){
+            dst.pixels[i][j] = convolution(i,j);
+        }
+    }
+}
+
 void BMP::SetSize(int height, int width, int bitCount)
 {
     this->height = height;
@@ -316,6 +405,38 @@ void BMP::RectCut(BMP& dst,std::pair<int,int> ul,std::pair<int,int> lr)
 
 }
 
+void BMP::MadianBlur(BMP &dst, std::pair<int, int> size)
+{
+    dst.SetSize(height,width,biBitCount);
+
+    // 求中值
+    auto madian = [this,size](int ii,int jj)->PIXELS{
+        std::vector<std::vector<unsigned char> > arr(4);
+        int temp_i = size.first / 2;
+        int temp_j = size.second / 2;
+        for(int i = std::max(ii-temp_i,0); i < std::min(ii+temp_i+1,this->height); i++){
+            for(int j = std::max(jj-temp_j,0);j< std::min(jj+temp_j+1,this->width);j++){
+                arr[0].push_back(this->pixels[i][j].B);
+                arr[1].push_back(this->pixels[i][j].G);
+                arr[2].push_back(this->pixels[i][j].R);
+                arr[3].push_back(this->pixels[i][j].A);
+            }
+        }
+        std::sort(arr[0].begin(),arr[0].end());
+        std::sort(arr[1].begin(),arr[1].end());
+        std::sort(arr[2].begin(),arr[2].end());
+        std::sort(arr[3].begin(),arr[3].end());
+        int leng = arr[0].size();
+        return {arr[0][leng/2],arr[1][leng/2],arr[2][leng/2],arr[3][leng/2]};
+    };
+
+    for(int i = 0;i<height;i++){
+        for(int j = 0;j<width;j++){
+            dst.pixels[i][j] = madian(i,j);
+        }
+    }
+}
+
 bool BMP::PixelsSerialization(std::vector<std::vector<unsigned char> >& data){
     if(biBitCount == 1){
         //biBitCount为1，将八个像素的索引信息放到一个字节里
@@ -455,6 +576,8 @@ void BMP::InterLinear(BMP &dst, std::pair<int, int> Size)
         }
     }
 }
+
+
 
 PIXELS operator-(unsigned char num, PIXELS &p)
 {
