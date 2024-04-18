@@ -57,6 +57,14 @@ struct PIXELS {
     PIXELS operator = (float fn){
         return {B = G = R = (unsigned char)fn};
     }
+
+    PIXELS operator + (PIXELS b){
+        return {B+b.B,G+b.G,R+b.R,A+b.A};
+    }
+
+    PIXELS operator * (int num){
+        return {B*num,G*num,R*num,A*num};
+    }
 };
 
 // 重载运算符
@@ -121,6 +129,16 @@ public:
      * @return {*}
      */
     void GaussianBlur(BMP& dst,std::pair<int,int> size,float sigma);
+
+    /*** 
+     * @description: 边框检测----Sobel算子
+     * @param {BMP&} dst
+     * @param {int} dy  计算 y 方向边缘（梯度）
+     * @param {int} dx  计算 x 方向边缘（梯度）
+     *              dy、dx不能同时为0
+     * @return {*}
+     */
+    void Sobel(BMP& dst,int dy,int dx);
 private:
 
     // 设置图像的参数
@@ -137,7 +155,7 @@ private:
 
     // 双线性插值
     void InterLinear(BMP& dst, std::pair<int,int> size);
-    
+
     /*** 
      * @description: 卷积操作
      * @param {vector<std::vector<int>>} kernel 卷积核
@@ -146,7 +164,9 @@ private:
      * @param {int&} sum
      * @return {*}
      */
-    PIXELS Convolution(std::vector<std::vector<int>> kernel,int ii,int jj,int& sum);
+    template <typename T>
+    PIXELS Convolution(const std::vector<std::vector<T>>& kernel,int ii,int jj);
+
 private:
     BMPFILEHEADER bmpfileheader;
     BITMAPINFOHEADER bitmapinfoheader;

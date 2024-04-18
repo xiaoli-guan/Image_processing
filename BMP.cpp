@@ -109,12 +109,12 @@ void BMP::GaussianBlur(BMP &dst, std::pair<int, int> size, float sigma)
     dst.SetSize(height,width,biBitCount);
 
     // 计算高斯滤波的卷积核
-    auto GetGaussianKernel = [&size,sigma](int& sum)->std::vector<std::vector<int>>{
-        std::vector<std::vector<int>> kernel(size.first,std::vector<int>(size.second));
-
+    auto GetGaussianKernel = [&size,sigma]()->std::vector<std::vector<float>>{
+        std::vector<std::vector<float>> kernel(size.first,std::vector<float>(size.second));
+        int sum = 0;
         float y = -size.first/2;
         float x = -size.second/2;
-        // 归一化
+        
         float temp = 1/(std::exp(-(x*x+y*y)/(2 * sigma * sigma)));
         for(int i = 0; i<size.first;i++){
             for(int j = 0;j<size.second;j++){
@@ -124,15 +124,21 @@ void BMP::GaussianBlur(BMP &dst, std::pair<int, int> size, float sigma)
                 sum += kernel[i][j];
             }
         }
+
+        // 归一化
+        for(int i = 0;i<size.first;i++){
+            for(int j = 0;j<size.second;j++){
+                kernel[i][j] /= sum;
+            }
+        }
         return kernel;
     };
 
-    int sum = 0;
-    auto kernel = GetGaussianKernel(sum);        
+    auto kernel = GetGaussianKernel();        
 
     for(int i = 0;i<height;i++){
         for(int j = 0;j<width;j++){
-            dst.pixels[i][j] = Convolution(kernel,i,j,sum);
+            dst.pixels[i][j] = Convolution(kernel,i,j);
         }
     }
 }
@@ -554,7 +560,8 @@ void BMP::InterLinear(BMP &dst, std::pair<int, int> Size)
     }
 }
 
-PIXELS BMP::Convolution(std::vector<std::vector<int>> kernel, int ii, int jj, int &sum)
+template <typename T>
+PIXELS BMP::Convolution(const std::vector<std::vector<T>>& kernel, int ii, int jj)
 {
     int sum_R = 0;
     int sum_G = 0;
@@ -574,8 +581,23 @@ PIXELS BMP::Convolution(std::vector<std::vector<int>> kernel, int ii, int jj, in
         }
     }
 
-    if(sum == 0)sum  = 1;
-    return {(unsigned char)(sum_B/sum),(unsigned char)(sum_G/sum),(unsigned char)(sum_R/sum),(unsigned char)(sum_A/sum)};
+    return {(unsigned char)abs(sum_B),(unsigned char)abs(sum_G),(unsigned char)abs(sum_R),(unsigned char)abs(sum_A)};
+}
+
+void BMP::Sobel(BMP &dst, int dy, int dx)
+{
+    dst.SetSize(height,width,biBitCount);
+
+    std::vector<std::vector<int>> kernelX = {{-1,0,1},{-2,0,2},{-1,0,1}};
+    std::vector<std::vector<int>> kernelY = {{-1,-2,-1},{0,0,0},{1,2,1}};
+
+    for(int i = 0;i<height;i++){
+        for(int j = 0;j<width;j++){
+            PIXELS x = Convolution(kernelX,i,j);
+            PIXELS y = Convolution(kernelY,i,j);
+            dst.pixels[i][j] = x*dx+y*dy;
+        }
+    }
 }
 
 PIXELS operator-(unsigned char num, PIXELS &p)
