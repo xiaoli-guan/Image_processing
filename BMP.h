@@ -137,8 +137,16 @@ private:
 
     // 双线性插值
     void InterLinear(BMP& dst, std::pair<int,int> size);
-
     
+    /*** 
+     * @description: 卷积操作
+     * @param {vector<std::vector<int>>} kernel 卷积核
+     * @param {int} ii
+     * @param {int} jj
+     * @param {int&} sum
+     * @return {*}
+     */
+    PIXELS Convolution(std::vector<std::vector<int>> kernel,int ii,int jj,int& sum);
 private:
     BMPFILEHEADER bmpfileheader;
     BITMAPINFOHEADER bitmapinfoheader;

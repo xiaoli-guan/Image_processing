@@ -128,34 +128,11 @@ void BMP::GaussianBlur(BMP &dst, std::pair<int, int> size, float sigma)
     };
 
     int sum = 0;
-    auto kernel = GetGaussianKernel(sum);
-
-    // Çó¾í»ý
-    auto convolution = [this,&kernel,&size,sum](int ii,int jj)->PIXELS{
-        int sum_R = 0;
-        int sum_G = 0;
-        int sum_B = 0;
-        int sum_A = 0;
-        int temp_i = size.first / 2;
-        int temp_j = size.second / 2;
-        int x = -1,y = -1;
-        for(int i = std::max(ii-temp_i,0); i < std::min(ii+temp_i+1,this->height); i++){
-            y = i-ii+size.first/2;
-            for(int j = std::max(jj-temp_j,0);j< std::min(jj+temp_j+1,this->width);j++){
-                x = j-jj+size.second/2;
-                sum_R += this->pixels[i][j].R * kernel[y][x];
-                sum_G += this->pixels[i][j].G * kernel[y][x];
-                sum_B += this->pixels[i][j].B * kernel[y][x];
-                sum_A += this->pixels[i][j].A * kernel[y][x];
-            }
-        }
-
-        return {(unsigned char)(sum_B/sum),(unsigned char)(sum_G/sum),(unsigned char)(sum_R/sum),(unsigned char)(sum_A/sum)};
-    };
+    auto kernel = GetGaussianKernel(sum);        
 
     for(int i = 0;i<height;i++){
         for(int j = 0;j<width;j++){
-            dst.pixels[i][j] = convolution(i,j);
+            dst.pixels[i][j] = Convolution(kernel,i,j,sum);
         }
     }
 }
@@ -577,7 +554,29 @@ void BMP::InterLinear(BMP &dst, std::pair<int, int> Size)
     }
 }
 
+PIXELS BMP::Convolution(std::vector<std::vector<int>> kernel, int ii, int jj, int &sum)
+{
+    int sum_R = 0;
+    int sum_G = 0;
+    int sum_B = 0;
+    int sum_A = 0;
+    int temp_i = kernel.size() / 2;
+    int temp_j = kernel[0].size() / 2;
+    int x = -1,y = -1;
+    for(int i = std::max(ii-temp_i,0); i < std::min(ii+temp_i+1,this->height); i++){
+        y = i-ii+temp_i;
+        for(int j = std::max(jj-temp_j,0);j< std::min(jj+temp_j+1,this->width);j++){
+            x = j-jj+temp_j;
+            sum_R += this->pixels[i][j].R * kernel[y][x];
+            sum_G += this->pixels[i][j].G * kernel[y][x];
+            sum_B += this->pixels[i][j].B * kernel[y][x];
+            sum_A += this->pixels[i][j].A * kernel[y][x];
+        }
+    }
 
+    if(sum == 0)sum  = 1;
+    return {(unsigned char)(sum_B/sum),(unsigned char)(sum_G/sum),(unsigned char)(sum_R/sum),(unsigned char)(sum_A/sum)};
+}
 
 PIXELS operator-(unsigned char num, PIXELS &p)
 {
