@@ -59,11 +59,11 @@ struct PIXELS {
     }
 
     PIXELS operator + (PIXELS b){
-        return {B+b.B,G+b.G,R+b.R,A+b.A};
+        return {(unsigned char)(B+b.B),(unsigned char)(G+b.G),(unsigned char)(R+b.R),(unsigned char)(A+b.A)};
     }
 
     PIXELS operator * (int num){
-        return {B*num,G*num,R*num,A*num};
+        return {(unsigned char)(B*num),(unsigned char)(G*num),(unsigned char)(R*num),(unsigned char)(A*num)};
     }
 };
 
