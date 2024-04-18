@@ -590,6 +590,7 @@ void BMP::Sobel(BMP &dst, int dy, int dx)
 
     std::vector<std::vector<int>> kernelX = {{-1,0,1},{-2,0,2},{-1,0,1}};
     std::vector<std::vector<int>> kernelY = {{-1,-2,-1},{0,0,0},{1,2,1}};
+    
 
     for(int i = 0;i<height;i++){
         for(int j = 0;j<width;j++){
@@ -598,6 +599,18 @@ void BMP::Sobel(BMP &dst, int dy, int dx)
             dst.pixels[i][j] = x*dx+y*dy;
         }
     }
+}
+
+void BMP::Sharpen(BMP &dst,std::vector<std::vector<int>> kernel={{0,-1,0},{-1,5,-1},{0,-1,0}})
+{
+    dst.SetSize(height,width,biBitCount);
+
+    for(int i = 0;i<height;i++){
+        for(int j = 0;j<width;j++){
+            dst.pixels[i][j] = Convolution(kernel,i,j);
+        }
+    }
+    
 }
 
 PIXELS operator-(unsigned char num, PIXELS &p)

@@ -62,8 +62,20 @@ struct PIXELS {
         return {(unsigned char)(B+b.B),(unsigned char)(G+b.G),(unsigned char)(R+b.R),(unsigned char)(A+b.A)};
     }
 
+    PIXELS operator + (int num){
+            return {(unsigned char)(B+num),(unsigned char)(G+num),(unsigned char)(R+num),(unsigned char)(A+num)};
+    }
+
+    PIXELS operator - (int num){
+            return {(unsigned char)(B-num),(unsigned char)(G-num),(unsigned char)(R-num),(unsigned char)(A-num)};
+    }
+
     PIXELS operator * (int num){
         return {(unsigned char)(B*num),(unsigned char)(G*num),(unsigned char)(R*num),(unsigned char)(A*num)};
+    }
+
+    PIXELS operator / (int num){
+        return {(unsigned char)(B/num),(unsigned char)(G/num),(unsigned char)(R/num),(unsigned char)(A/num)};
     }
 };
 
@@ -139,6 +151,14 @@ public:
      * @return {*}
      */
     void Sobel(BMP& dst,int dy,int dx);
+
+    /*** 
+     * @description: 图像锐化
+     * @param {BMP&} dst
+     * @param {vector<std::vector<int>>} kernel 算子，默认使用拉普拉斯算子
+     * @return {*}
+     */    
+    void Sharpen(BMP& dst,std::vector<std::vector<int>> kernel={{0,-1,0},{-1,5,-1},{0,-1,0}});
 private:
 
     // 设置图像的参数
