@@ -601,7 +601,7 @@ void BMP::Sobel(BMP &dst, int dy, int dx)
     }
 }
 
-void BMP::Sharpen(BMP &dst,std::vector<std::vector<int>> kernel={{0,-1,0},{-1,5,-1},{0,-1,0}})
+void BMP::Sharpen(BMP &dst,std::vector<std::vector<int>> kernel)
 {
     dst.SetSize(height,width,biBitCount);
 

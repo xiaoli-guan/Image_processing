@@ -159,6 +159,8 @@ public:
      * @return {*}
      */    
     void Sharpen(BMP& dst,std::vector<std::vector<int>> kernel={{0,-1,0},{-1,5,-1},{0,-1,0}});
+
+
 private:
 
     // 设置图像的参数

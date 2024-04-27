@@ -9,9 +9,8 @@ int main() {
     BMP test4;
     string ImageName = "Lena512x512.bmp";
     test.ReadImage(ImageName);
-    test.WeightGray(test2);
 
-    test2.GaussianBlur(test3,{3,3},1.2);
+    test.GaussianBlur(test3,{3,3},1.2);
     test3.WriteImage("gaussDst.bmp");
     test3.Sharpen(test4);
     test4.WriteImage("sharpenDst.bmp");
